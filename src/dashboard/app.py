@@ -3,10 +3,18 @@ Real-time Clickstream & Anomaly Monitoring Dashboard (Streamlit).
 Supports both Distributed Kafka Mode (Docker/Production) and Interactive Live Simulation Mode (Streamlit Cloud).
 """
 
+import os
+import sys
+from pathlib import Path
+
+# Add project root directory to sys.path for Streamlit Cloud execution
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from collections import deque
 from datetime import datetime, timezone, timedelta
 import json
-import os
 import random
 import time
 from typing import Any, Dict, List, Optional

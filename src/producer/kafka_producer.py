@@ -3,11 +3,18 @@ Event publisher service streaming clickstream events to Apache Kafka.
 """
 
 import json
+import os
+from pathlib import Path
 import random
 import signal
 import sys
 import time
 from typing import Any, Dict, Optional
+
+# Add project root directory to sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
