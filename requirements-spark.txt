@@ -1,0 +1,6 @@
+# PySpark and Lakehouse Distributed Streaming Dependencies
+-r requirements.txt
+pyspark>=3.5.0,<3.6.0
+pyarrow>=15.0.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
