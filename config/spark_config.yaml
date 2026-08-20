@@ -1,0 +1,33 @@
+spark:
+  app_name: "ClickstreamAnomalyDetector"
+  master: "local[*]"
+  log_level: "WARN"
+  shuffle_partitions: 4
+  trigger_processing_time: "5 seconds"
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  input_topic: "events.raw"
+  output_anomaly_topic: "events.anomalies"
+  starting_offsets: "latest"
+  fail_on_data_loss: false
+
+streaming:
+  watermark_duration: "10 minutes"
+  window_duration: "5 minutes"
+  slide_duration: "1 minute"
+  rules:
+    max_failed_logins: 5
+    max_transaction_amount: 10000.0
+    max_transaction_velocity: 3
+    max_clicks_per_window: 100
+
+storage:
+  s3_endpoint: "http://localhost:9000"
+  s3_access_key: "minioadmin"
+  s3_secret_key: "minioadmin"
+  s3_bucket: "clickstream-warehouse"
+  events_path: "s3a://clickstream-warehouse/events/"
+  anomalies_path: "s3a://clickstream-warehouse/anomalies/"
+  checkpoint_base_path: "s3a://clickstream-warehouse/checkpoints/"
+  local_checkpoint_path: "./checkpoints/streaming_job"

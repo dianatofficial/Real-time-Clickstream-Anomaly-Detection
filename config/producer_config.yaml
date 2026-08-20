@@ -1,0 +1,31 @@
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topic: "events.raw"
+  acks: "all"
+  retries: 3
+  batch_size: 16384
+  linger_ms: 10
+
+simulation:
+  events_per_second: 20
+  total_users: 250
+  concurrent_sessions: 40
+  late_event_probability: 0.05
+  max_late_delay_seconds: 300
+
+anomaly_injection:
+  enabled: true
+  injection_interval_seconds: 15
+  scenarios:
+    - name: "credential_stuffing"
+      probability: 0.4
+      failed_attempts: 7
+      target_interval_ms: 200
+    - name: "transaction_velocity_spike"
+      probability: 0.3
+      burst_count: 4
+      amount_range: [2500.0, 15000.0]
+    - name: "bot_click_burst"
+      probability: 0.3
+      click_count: 120
+      duration_seconds: 10
