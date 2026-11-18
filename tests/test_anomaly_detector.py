@@ -1,15 +1,10 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+
 import pytest
 
 pyspark = pytest.importorskip("pyspark")
 from pyspark.sql import SparkSession
-from pyspark.sql.types import (
-    DoubleType,
-    StringType,
-    StructField,
-    StructType,
-    TimestampType,
-)
+from pyspark.sql.types import DoubleType, StringType, StructField, StructType, TimestampType
 
 from src.streaming.anomaly_detector import AnomalyDetectionEngine
 
@@ -51,12 +46,14 @@ def test_detect_login_brute_force_logic(spark_session, sample_config):
     engine = AnomalyDetectionEngine(sample_config)
 
     now = datetime(2026, 8, 20, 10, 0, 0, tzinfo=timezone.utc)
-    schema = StructType([
-        StructField("user_id", StringType(), False),
-        StructField("ip_address", StringType(), False),
-        StructField("action", StringType(), False),
-        StructField("event_time", TimestampType(), False),
-    ])
+    schema = StructType(
+        [
+            StructField("user_id", StringType(), False),
+            StructField("ip_address", StringType(), False),
+            StructField("action", StringType(), False),
+            StructField("event_time", TimestampType(), False),
+        ]
+    )
 
     # 4 failed logins for usr_victim
     data = [
@@ -64,7 +61,12 @@ def test_detect_login_brute_force_logic(spark_session, sample_config):
         ("usr_victim", "192.168.1.50", "login_failed", now + timedelta(seconds=20)),
         ("usr_victim", "192.168.1.50", "login_failed", now + timedelta(seconds=30)),
         ("usr_victim", "192.168.1.50", "login_failed", now + timedelta(seconds=40)),
-        ("usr_normal", "192.168.1.51", "login_failed", now + timedelta(seconds=10)),  # 1 failed login
+        (
+            "usr_normal",
+            "192.168.1.51",
+            "login_failed",
+            now + timedelta(seconds=10),
+        ),  # 1 failed login
     ]
 
     df = spark_session.createDataFrame(data, schema)
@@ -83,13 +85,15 @@ def test_detect_transaction_velocity_logic(spark_session, sample_config):
     engine = AnomalyDetectionEngine(sample_config)
 
     now = datetime(2026, 8, 20, 10, 0, 0, tzinfo=timezone.utc)
-    schema = StructType([
-        StructField("user_id", StringType(), False),
-        StructField("ip_address", StringType(), False),
-        StructField("action", StringType(), False),
-        StructField("amount", DoubleType(), False),
-        StructField("event_time", TimestampType(), False),
-    ])
+    schema = StructType(
+        [
+            StructField("user_id", StringType(), False),
+            StructField("ip_address", StringType(), False),
+            StructField("action", StringType(), False),
+            StructField("amount", DoubleType(), False),
+            StructField("event_time", TimestampType(), False),
+        ]
+    )
 
     # 3 rapid transactions exceeding threshold of 2
     data = [

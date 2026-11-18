@@ -3,12 +3,11 @@ Event publisher service streaming clickstream events to Apache Kafka.
 """
 
 import json
-import os
-from pathlib import Path
 import random
 import signal
 import sys
 import time
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 # Add project root directory to sys.path

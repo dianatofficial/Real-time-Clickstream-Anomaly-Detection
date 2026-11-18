@@ -2,9 +2,8 @@
 Main PySpark Structured Streaming driver application.
 """
 
-import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Any, Dict
 
 # Add project root directory to sys.path
@@ -17,7 +16,7 @@ from pyspark.sql import SparkSession
 from src.common.config import load_config
 from src.common.logging_utils import get_logger
 from src.streaming.anomaly_detector import AnomalyDetectionEngine
-from src.streaming.sinks import S3ParquetSink, KafkaAnomalySink, create_console_sink
+from src.streaming.sinks import KafkaAnomalySink, S3ParquetSink, create_console_sink
 
 logger = get_logger(__name__)
 
@@ -72,12 +71,13 @@ def run_streaming_pipeline() -> None:
 
     spark = create_spark_session(config)
 
-    logger.info("Connecting stream to Kafka brokers at %s on topic '%s'...", bootstrap_servers, input_topic)
+    logger.info(
+        "Connecting stream to Kafka brokers at %s on topic '%s'...", bootstrap_servers, input_topic
+    )
 
     # 1. Ingest Kafka Raw Stream
     raw_stream_df = (
-        spark.readStream
-        .format("kafka")
+        spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", bootstrap_servers)
         .option("subscribe", input_topic)
         .option("startingOffsets", starting_offsets)
@@ -104,12 +104,16 @@ def run_streaming_pipeline() -> None:
 
         # B. Write anomalies to Kafka topic
         logger.info("Launching Anomaly Kafka Sink...")
-        q_anom_kafka = kafka_sink.write_anomaly_stream(anomalies_df, checkpoint_dir="anomalies_kafka_chk")
+        q_anom_kafka = kafka_sink.write_anomaly_stream(
+            anomalies_df, checkpoint_dir="anomalies_kafka_chk"
+        )
         queries.append(q_anom_kafka)
 
         # C. Console Monitoring Sink for real-time driver visibility
         logger.info("Launching Anomaly Console Sink...")
-        q_console = create_console_sink(anomalies_df, query_name="live_anomalies", output_mode="update")
+        q_console = create_console_sink(
+            anomalies_df, query_name="live_anomalies", output_mode="update"
+        )
         queries.append(q_console)
 
         logger.info("All streaming queries active. Awaiting new events...")

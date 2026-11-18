@@ -2,10 +2,10 @@
 High-throughput synthetic event generator with configurable anomaly injection scenarios.
 """
 
-from datetime import datetime, timezone, timedelta
 import random
-from typing import Any, Dict, List, Optional
 import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 
 from faker import Faker
 
@@ -109,7 +109,10 @@ class EventGenerator:
         }
 
     def generate_credential_stuffing_burst(
-        self, target_user: Optional[str] = None, attacker_ip: Optional[str] = None, attempts: int = 7
+        self,
+        target_user: Optional[str] = None,
+        attacker_ip: Optional[str] = None,
+        attempts: int = 7,
     ) -> List[Dict[str, Any]]:
         """
         Simulates brute-force authentication attacks against a single user/IP.

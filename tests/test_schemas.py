@@ -3,6 +3,7 @@ Unit tests for data schema validation and serialization models.
 """
 
 from datetime import datetime, timezone
+
 import pytest
 from pydantic import ValidationError
 
@@ -47,7 +48,7 @@ def test_clickstream_event_missing_required_field():
 def test_pyspark_schema_definitions():
     """Verifies PySpark schema field counts and data type assignments."""
     pytest.importorskip("pyspark")
-    from src.common.schemas import CLICKSTREAM_SCHEMA, ANOMALY_SCHEMA
+    from src.common.schemas import ANOMALY_SCHEMA, CLICKSTREAM_SCHEMA
 
     assert len(CLICKSTREAM_SCHEMA.fields) == 12
     field_names = [f.name for f in CLICKSTREAM_SCHEMA.fields]

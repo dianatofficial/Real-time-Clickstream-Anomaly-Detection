@@ -3,18 +3,11 @@ PySpark Structured Streaming transformations, sliding window aggregations, and a
 """
 
 from typing import Any, Dict
+
 from pyspark.sql import DataFrame
-from pyspark.sql.functions import (
-    col,
-    count,
-    current_timestamp,
-    from_json,
-    lit,
-    sum as _sum,
-    to_timestamp,
-    when,
-    window,
-)
+from pyspark.sql.functions import col, count, current_timestamp, from_json, lit
+from pyspark.sql.functions import sum as _sum
+from pyspark.sql.functions import to_timestamp, window
 
 from src.common.logging_utils import get_logger
 from src.common.schemas import CLICKSTREAM_SCHEMA

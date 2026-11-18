@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 120
+max-complexity = 15
+per-file-ignores =
+    src/*: E402
+    tests/*: E402

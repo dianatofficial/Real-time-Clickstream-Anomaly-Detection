@@ -12,15 +12,14 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from collections import deque
-from datetime import datetime, timezone, timedelta
 import json
-import random
 import time
+from collections import deque
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
+
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
 # Import event generator for live cloud demo mode
@@ -98,6 +97,7 @@ def try_kafka_consumer() -> Optional[Any]:
     """Attempts to connect to Kafka broker. Returns None if unreachable."""
     try:
         from kafka import KafkaConsumer
+
         consumer = KafkaConsumer(
             ANOMALY_TOPIC,
             bootstrap_servers=KAFKA_BROKERS,
@@ -112,7 +112,9 @@ def try_kafka_consumer() -> Optional[Any]:
         return None
 
 
-def run_sliding_window_detection(events: List[Dict[str, Any]], window_minutes: int = 5) -> List[Dict[str, Any]]:
+def run_sliding_window_detection(  # noqa: C901
+    events: List[Dict[str, Any]], window_minutes: int = 5
+) -> List[Dict[str, Any]]:
     """
     In-memory stateful sliding-window anomaly evaluation engine for cloud demo environments.
     Applies the exact same threshold logic as the PySpark Structured Streaming job.
@@ -141,18 +143,20 @@ def run_sliding_window_detection(events: List[Dict[str, Any]], window_minutes: i
 
     for (ip, user), count in failed_logins.items():
         if count >= 5:
-            detected_anomalies.append({
-                "window_start": cutoff.strftime("%H:%M:%S"),
-                "window_end": now.strftime("%H:%M:%S"),
-                "user_id": user,
-                "ip_address": ip,
-                "anomaly_type": "CREDENTIAL_STUFFING_BRUTE_FORCE",
-                "severity": "HIGH",
-                "event_count": count,
-                "total_amount": 0.0,
-                "details": f"{count} failed login attempts in 5-minute sliding window",
-                "detection_timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            detected_anomalies.append(
+                {
+                    "window_start": cutoff.strftime("%H:%M:%S"),
+                    "window_end": now.strftime("%H:%M:%S"),
+                    "user_id": user,
+                    "ip_address": ip,
+                    "anomaly_type": "CREDENTIAL_STUFFING_BRUTE_FORCE",
+                    "severity": "HIGH",
+                    "event_count": count,
+                    "total_amount": 0.0,
+                    "details": f"{count} failed login attempts in 5-minute sliding window",
+                    "detection_timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
 
     # 2. Transaction Velocity Spike Rule (>= 3 txns or amount >= $10,000)
     user_txns = {}
@@ -166,18 +170,20 @@ def run_sliding_window_detection(events: List[Dict[str, Any]], window_minutes: i
 
     for (user, ip), stats in user_txns.items():
         if stats["count"] >= 3 or stats["amount"] >= 10000.0:
-            detected_anomalies.append({
-                "window_start": cutoff.strftime("%H:%M:%S"),
-                "window_end": now.strftime("%H:%M:%S"),
-                "user_id": user,
-                "ip_address": ip,
-                "anomaly_type": "TRANSACTION_VELOCITY_SPIKE",
-                "severity": "CRITICAL",
-                "event_count": stats["count"],
-                "total_amount": round(stats["amount"], 2),
-                "details": f"Rapid sequence: {stats['count']} transactions totaling ${stats['amount']:,.2f}",
-                "detection_timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            detected_anomalies.append(
+                {
+                    "window_start": cutoff.strftime("%H:%M:%S"),
+                    "window_end": now.strftime("%H:%M:%S"),
+                    "user_id": user,
+                    "ip_address": ip,
+                    "anomaly_type": "TRANSACTION_VELOCITY_SPIKE",
+                    "severity": "CRITICAL",
+                    "event_count": stats["count"],
+                    "total_amount": round(stats["amount"], 2),
+                    "details": f"Rapid sequence: {stats['count']} transactions totaling ${stats['amount']:,.2f}",
+                    "detection_timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
 
     # 3. Bot Scraper Burst Rule (>= 80 clicks in window)
     ip_clicks = {}
@@ -188,18 +194,20 @@ def run_sliding_window_detection(events: List[Dict[str, Any]], window_minutes: i
 
     for ip, count in ip_clicks.items():
         if count >= 80:
-            detected_anomalies.append({
-                "window_start": cutoff.strftime("%H:%M:%S"),
-                "window_end": now.strftime("%H:%M:%S"),
-                "user_id": "automated_client",
-                "ip_address": ip,
-                "anomaly_type": "BOT_SCRAPING_BURST",
-                "severity": "MEDIUM",
-                "event_count": count,
-                "total_amount": 0.0,
-                "details": f"Volumetric spike: {count} requests within window",
-                "detection_timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
-            })
+            detected_anomalies.append(
+                {
+                    "window_start": cutoff.strftime("%H:%M:%S"),
+                    "window_end": now.strftime("%H:%M:%S"),
+                    "user_id": "automated_client",
+                    "ip_address": ip,
+                    "anomaly_type": "BOT_SCRAPING_BURST",
+                    "severity": "MEDIUM",
+                    "event_count": count,
+                    "total_amount": 0.0,
+                    "details": f"Volumetric spike: {count} requests within window",
+                    "detection_timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
 
     return detected_anomalies
 
@@ -215,10 +223,16 @@ with st.sidebar:
     st.divider()
 
     if is_kafka_mode:
-        st.markdown('<span class="status-badge-kafka">● Kafka Broker Connected</span>', unsafe_allow_html=True)
+        st.markdown(
+            '<span class="status-badge-kafka">● Kafka Broker Connected</span>',
+            unsafe_allow_html=True,
+        )
         st.caption(f"Broker: `{KAFKA_BROKERS}` | Topic: `{ANOMALY_TOPIC}`")
     else:
-        st.markdown('<span class="status-badge-cloud">● Cloud Simulation Mode</span>', unsafe_allow_html=True)
+        st.markdown(
+            '<span class="status-badge-cloud">● Cloud Simulation Mode</span>',
+            unsafe_allow_html=True,
+        )
         st.caption("Running in-memory streaming engine directly on Streamlit Cloud.")
 
     st.divider()
@@ -298,7 +312,9 @@ else:
             st.session_state.total_events_processed += 1
 
         # Evaluate sliding window anomaly detection rules
-        new_anomalies = run_sliding_window_detection(list(st.session_state.raw_events_buffer), window_minutes=5)
+        new_anomalies = run_sliding_window_detection(
+            list(st.session_state.raw_events_buffer), window_minutes=5
+        )
         for anom in new_anomalies:
             # Avoid duplicate logs for identical window & target
             exists = any(
@@ -314,7 +330,9 @@ else:
 
 # Header
 st.title("Real-Time Clickstream & Anomaly Detection Pipeline")
-st.markdown("Live distributed stream processing monitoring for security threats, fraud, and volumetric anomalies.")
+st.markdown(
+    "Live distributed stream processing monitoring for security threats, fraud, and volumetric anomalies."
+)
 
 # KPI Metric Cards
 col1, col2, col3, col4 = st.columns(4)
@@ -322,12 +340,22 @@ col1, col2, col3, col4 = st.columns(4)
 total_anom = len(st.session_state.anomaly_records)
 crit_count = sum(1 for a in st.session_state.anomaly_records if a.get("severity") == "CRITICAL")
 high_count = sum(1 for a in st.session_state.anomaly_records if a.get("severity") == "HIGH")
-unique_ips = len(set(a.get("ip_address", "") for a in st.session_state.anomaly_records if a.get("ip_address")))
+unique_ips = len(
+    set(a.get("ip_address", "") for a in st.session_state.anomaly_records if a.get("ip_address"))
+)
 
 with col1:
-    st.metric(label="Total Ingested Events", value=f"{st.session_state.total_events_processed:,}", delta="Live Ingestion")
+    st.metric(
+        label="Total Ingested Events",
+        value=f"{st.session_state.total_events_processed:,}",
+        delta="Live Ingestion",
+    )
 with col2:
-    st.metric(label="Total Anomalies Flagged", value=st.session_state.total_anomalies_detected, delta=f"{total_anom} in buffer")
+    st.metric(
+        label="Total Anomalies Flagged",
+        value=st.session_state.total_anomalies_detected,
+        delta=f"{total_anom} in buffer",
+    )
 with col3:
     st.metric(label="Critical Threats", value=crit_count, delta_color="inverse")
 with col4:
@@ -363,7 +391,9 @@ with c1:
         fig_pie.update_layout(margin=dict(t=20, b=20, l=20, r=20), height=320)
         st.plotly_chart(fig_pie, use_container_width=True)
     else:
-        st.info("Generating and analyzing clickstream stream... Use the sidebar buttons to inject attacks.")
+        st.info(
+            "Generating and analyzing clickstream stream... Use the sidebar buttons to inject attacks."
+        )
 
 with c2:
     st.subheader("Top Flagged IPs by Violation Count")
@@ -389,7 +419,16 @@ st.divider()
 # Live Table Feed
 st.subheader("Live Flagged Threat Log")
 if not df_anom.empty:
-    cols = ["detection_timestamp", "anomaly_type", "severity", "user_id", "ip_address", "event_count", "total_amount", "details"]
+    cols = [
+        "detection_timestamp",
+        "anomaly_type",
+        "severity",
+        "user_id",
+        "ip_address",
+        "event_count",
+        "total_amount",
+        "details",
+    ]
     valid_cols = [c for c in cols if c in df_anom.columns]
     st.dataframe(
         df_anom[valid_cols].head(30),
@@ -397,7 +436,9 @@ if not df_anom.empty:
         hide_index=True,
     )
 else:
-    st.write("Waiting for anomaly events. The 5-minute sliding window state store is aggregating background events.")
+    st.write(
+        "Waiting for anomaly events. The 5-minute sliding window state store is aggregating background events."
+    )
 
 # Real-Time Auto Refresh
 if st.session_state.sim_active:

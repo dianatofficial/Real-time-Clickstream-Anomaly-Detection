@@ -5,6 +5,7 @@ YAML and Environment Variable configuration management module.
 import os
 from pathlib import Path
 from typing import Any, Dict
+
 import yaml
 
 from src.common.logging_utils import get_logger
@@ -54,7 +55,9 @@ def load_config(config_type: str = "spark") -> Dict[str, Any]:
     # Environment variable overrides
     if config_type == "spark":
         if "KAFKA_BOOTSTRAP_SERVERS" in os.environ:
-            config.setdefault("kafka", {})["bootstrap_servers"] = os.environ["KAFKA_BOOTSTRAP_SERVERS"]
+            config.setdefault("kafka", {})["bootstrap_servers"] = os.environ[
+                "KAFKA_BOOTSTRAP_SERVERS"
+            ]
         if "MINIO_ENDPOINT" in os.environ:
             config.setdefault("storage", {})["s3_endpoint"] = os.environ["MINIO_ENDPOINT"]
         if "MINIO_ACCESS_KEY" in os.environ:
@@ -66,10 +69,14 @@ def load_config(config_type: str = "spark") -> Dict[str, Any]:
 
     elif config_type == "producer":
         if "KAFKA_BOOTSTRAP_SERVERS" in os.environ:
-            config.setdefault("kafka", {})["bootstrap_servers"] = os.environ["KAFKA_BOOTSTRAP_SERVERS"]
+            config.setdefault("kafka", {})["bootstrap_servers"] = os.environ[
+                "KAFKA_BOOTSTRAP_SERVERS"
+            ]
         if "KAFKA_TOPIC" in os.environ:
             config.setdefault("kafka", {})["topic"] = os.environ["KAFKA_TOPIC"]
         if "EVENTS_PER_SECOND" in os.environ:
-            config.setdefault("simulation", {})["events_per_second"] = int(os.environ["EVENTS_PER_SECOND"])
+            config.setdefault("simulation", {})["events_per_second"] = int(
+                os.environ["EVENTS_PER_SECOND"]
+            )
 
     return config
